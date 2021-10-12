@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="report_invoice_installments_document">
+            <t t-call="web.external_layout">
+                <t t-set="o" t-value="o.with_context(lang=lang)" />
+                <t t-set="address">
+                    <address t-field="o.partner_id" t-options="{'idget': 'contact', 'fields': ['address', 'name'], 'no_marker': True}"/>
+                </t>
+                <div class="page">
+                    <h2 class="mt16">
+                        <span t-field="o.name"/>: Installments
+                    </h2>
+
+                    <div id="informations1" class="row mt32 mb32">
+                        <div class="col-auto mw-100 mb-2">
+                            <strong>Tenure Amount:</strong>
+                            <p class="m-0" t-field="o.tenure_amt"/>
+                        </div>
+                        <div class="col-auto mw-100 mb-2">
+                            <strong>Down Payment:</strong>
+                            <p class="m-0" t-field="o.down_payment_amt"/>
+                        </div>
+                        <div class="col-auto mw-100 mb-2">
+                            <strong>Payable Amount:</strong>
+                            <p class="m-0" t-field="o.payable_amt"/>
+                        </div>
+                        <div class="col-auto mw-100 mb-2">
+                            <strong>Installment Amount:</strong>
+                            <p class="m-0" t-field="o.installment_amt"/>
+                        </div>
+                        <div class="col-auto mw-100 mb-2">
+                            <strong>Tenure (months):</strong>
+                            <p class="m-0" t-field="o.tenure"/>
+                        </div>
+                    </div>
+                    <table class="table table-sm o_main_table">
+                        <thead>
+                            <tr>
+                                <th>#No</th>
+                                <th>Payment Date</th>
+                                <th>Amount</th>
+                                <th>Description</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-set="total" t-value="0.0"/>
+                            <t t-foreach="o.installment_ids" t-as="line">
+                                <tr>
+                                    <td><t t-esc="line.index"/></td>
+                                    <td><t t-esc="line.payment_date"/></td>
+                                    <td><t t-esc="line.amount" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td>
+                                    <td><t t-esc="line.description"/></td>
+                                    <td><t t-esc="line.state"/></td>
+                                </tr>
+                                <t t-set="total" t-value="total + line.amount"/>
+                            </t>
+                            <tr>
+                                <td><b>Total</b></td>
+                                <td></td>
+                                <td><b><t t-esc="total" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></b></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </t>
+        </template>
+
+        <template id="report_invoice_installments">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-call="payment_installment_kanak.report_invoice_installments_document" t-lang="o.partner_id.lang"/>
+                </t>
+            </t>
+        </template>
+
+        <record id="action_report_invoice_installments" model="ir.actions.report">
+            <field name="name">Installments</field>
+            <field name="model">account.move</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">payment_installment_kanak.report_invoice_installments</field>
+            <field name="report_file">payment_installment_kanak.report_invoice_installments</field>
+            <field name="print_report_name">'Installments - %s' % (object.name)</field>
+            <field name="binding_model_id" ref="account.model_account_move"/>
+            <field name="binding_type">report</field>
+            <field name="groups_id" eval="[(4, ref('payment_installment_kanak.group_enable_installments'))]"/>
+        </record>
+    </data>
+</odoo>
