@@ -173,8 +173,10 @@ class AccountMove(models.Model):
             if order.installment_amt:
                 index = 1
                 if order.amount_residual:
-                    payment_date = order.installment_ids.filtered(lambda x: x.state == 'draft')[0].payment_date
-                    order.installment_ids.filtered(lambda x: x.state == 'draft').unlink()
+                    payment_date = order.invoice_date
+                    if order.installment_ids:
+                        payment_date = order.installment_ids.filtered(lambda x: x.state == 'draft')[0].payment_date
+                        order.installment_ids.filtered(lambda x: x.state == 'draft').unlink()
                     sol = self.env['sale.order.line'].search([('id', 'in', order.invoice_line_ids.mapped('sale_line_ids').ids)]).order_id
                     sol.installment_ids.filtered(lambda x: x.state == 'draft').unlink()
                     amount = order.installment_amt
