@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates id="template" inherit_id="point_of_sale.template" xml:space="preserve">
+    <t t-name="ProductItemQty" t-inherit="point_of_sale.ProductItem" t-inherit-mode="extension" owl="1">        
+        <xpath expr="//div[hasclass('product-img')]" position="inside">
+            <t t-if="env.pos.config.show_product_quantity and props.product.type == 'product'">
+                <span t-attf-class="qty-tag #{props.product.qty_available lte 0 ? 'not-available':''}">
+                    <t t-esc="props.product.rounded_qty()"/>
+                </span>
+            </t>
+        </xpath>
+    </t>
+    <t t-name="OrderLineQty" t-inherit="point_of_sale.Orderline" t-inherit-mode="extension" owl="1">        
+        <xpath expr="//ul[@class='info-list']/t[1]" position="attributes">
+            <attribute name="t-if">props.line.get_quantity_str() !== '1' || props.line.selected || props.line.get_product().qty_available lt props.line.quantity</attribute>
+        </xpath>
+        <xpath expr="//t[@t-esc='props.line.get_quantity_str()']" position="after">
+            <t t-if="env.pos.config.show_product_quantity &amp;&amp; props.line.get_product().type == 'product'">
+                <t t-set='qty_available' t-value='props.line.get_product().qty_available'/>
+                (of <span t-attf-class="qty-info {{qty_available lt props.line.quantity ? 'not-available':''}}">
+                    <t t-esc="props.line.get_product().rounded_qty()" />
+                </span>)
+            </t>
+        </xpath>
+    </t>
+</templates>
